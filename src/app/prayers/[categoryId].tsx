@@ -1,3 +1,4 @@
+
 import React from "react";
 import {
   View,
@@ -5,13 +6,14 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+
 import { usePrayersByTag } from "../../hooks/usePrayersByTag";
 import { useFontSize } from "../../hooks/useFontSize";
-import Header from "../../components/layout/header";
+import PrayerListItem from "../../components/ui/PrayerListItem";
 import { colors, fonts } from "../../constants/theme";
 
 export default function CategoryPrayersScreen() {
@@ -24,82 +26,91 @@ export default function CategoryPrayersScreen() {
   const prayers = usePrayersByTag(numericId);
   const { scaledSize } = useFontSize();
 
+  const name = categoryName || "Prayers";
+
   return (
-    <SafeAreaView style={styles.container}>
-      <Header title={categoryName || "Prayers"} />
-
-      <View style={styles.subHeader}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.backButton}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="arrow-back" size={20} color={colors.primary} />
-          <Text style={[styles.backText, { fontSize: scaledSize(14) }]}>
-            Back
-          </Text>
-        </TouchableOpacity>
-
-        <Text style={[styles.countBadge, { fontSize: scaledSize(12) }]}>
-          {prayers.length} {prayers.length === 1 ? "prayer" : "prayers"}
-        </Text>
-      </View>
-
+    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
       <FlatList
         data={prayers}
         keyExtractor={(item) => String(item.Id)}
-        contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.card}
-            activeOpacity={0.85}
+        contentContainerStyle={styles.listContent}
+        ListHeaderComponent={
+          <View style={styles.intro}>
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={styles.backButton}
+              activeOpacity={0.7}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Ionicons name="arrow-back" size={22} color={colors.primary} />
+            </TouchableOpacity>
+
+            <View style={styles.eyebrowRow}>
+              <View style={styles.goldLine} />
+              <Text style={styles.eyebrow}>THE PRAYER COLLECTION</Text>
+              <View style={styles.goldLine} />
+            </View>
+
+            <Text style={styles.heading}>{name}</Text>
+
+            <Text style={styles.description}>
+              Words for reflection, devotion, and spiritual connection.
+            </Text>
+
+            <View style={styles.collectionInfo}>
+              <View style={styles.collectionIcon}>
+                <Ionicons
+                  name="book-outline"
+                  size={17}
+                  color={colors.secondary}
+                />
+              </View>
+
+              <Text style={styles.collectionCount}>
+                {prayers.length} {prayers.length === 1 ? "prayer" : "prayers"}
+              </Text>
+
+              <View style={styles.infoDot} />
+
+              <Text style={styles.collectionHint}>Take a moment to reflect</Text>
+            </View>
+
+            <View style={styles.sectionHeading}>
+              <Text style={styles.sectionTitle}>Explore prayers</Text>
+              <View style={styles.sectionLine} />
+            </View>
+          </View>
+        }
+        renderItem={({ item, index }) => (
+          <PrayerListItem
+            prayer={item}
+            index={index}
             onPress={() =>
               router.push({
                 pathname: "/prayers/read/[readId]",
                 params: { readId: String(item.Id) },
               })
             }
-          >
-            <View style={styles.cardHeader}>
-              <Text style={[styles.author, { fontSize: scaledSize(12) }]}>
-                {item.FirstTagName || "Bahá’í Prayer"}
-              </Text>
-              <Text style={[styles.wordCount, { fontSize: scaledSize(11) }]}>
-                {item.Text.split(/\s+/).length} words
-              </Text>
-            </View>
-
-            <Text
-              style={[
-                styles.snippet,
-                { fontSize: scaledSize(15), lineHeight: scaledSize(22) },
-              ]}
-              numberOfLines={3}
-            >
-              {item.Text}
-            </Text>
-
-            <View style={styles.cardFooter}>
-              <Text style={[styles.readMore, { fontSize: scaledSize(13) }]}>
-                Read full prayer
-              </Text>
+          />
+        )}
+        ListEmptyComponent={
+          <View style={styles.emptyState}>
+            <View style={styles.emptyIcon}>
               <Ionicons
-                name="chevron-forward"
-                size={16}
+                name="book-outline"
+                size={30}
                 color={colors.secondary}
               />
             </View>
-          </TouchableOpacity>
-        )}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Ionicons name="book-outline" size={40} color={colors.muted} />
-            <Text style={[styles.emptyText, { fontSize: scaledSize(15) }]}>
-              No prayers found in this category.
+
+            <Text style={styles.emptyTitle}>A quiet space awaits</Text>
+            <Text style={styles.emptyDescription}>
+              There are no prayers in this collection yet.
             </Text>
           </View>
         }
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
       />
     </SafeAreaView>
   );
@@ -110,93 +121,234 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
-  subHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 18,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    backgroundColor: colors.surface,
+
+  listContent: {
+    paddingHorizontal: 22,
+    paddingBottom: 40,
   },
+
+  intro: {
+    paddingTop: 12,
+    paddingBottom: 8,
+  },
+
   backButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  backText: {
-    fontFamily: fonts.bodyMedium,
-    color: colors.primary,
-  },
-  countBadge: {
-    fontFamily: fonts.body,
-    color: colors.muted,
-    backgroundColor: colors.neutral,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  listContainer: {
-    padding: 16,
-    gap: 14,
-  },
-  card: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: colors.surface,
-    borderRadius: 18,
-    padding: 16,
     borderWidth: 1,
     borderColor: colors.border,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 3,
-    marginBottom: 12,
-  },
-  cardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  author: {
-    fontFamily: fonts.bodyBold,
-    color: colors.secondary,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  wordCount: {
-    fontFamily: fonts.body,
-    color: colors.muted,
-  },
-  snippet: {
-    fontFamily: fonts.heading,
-    color: colors.text,
-    marginBottom: 12,
-  },
-  cardFooter: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: colors.neutral,
-  },
-  readMore: {
-    fontFamily: fonts.bodyMedium,
-    color: colors.primary,
-  },
-  emptyContainer: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 60,
-    gap: 12,
+    marginBottom: 16,
   },
-  emptyText: {
-    fontFamily: fonts.bodyMedium,
+
+  eyebrowRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 12,
+    marginBottom: 18,
+  },
+
+  goldLine: {
+    height: 1,
+    width: 25,
+    backgroundColor: colors.secondary,
+    opacity: 0.7,
+  },
+
+  eyebrow: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 10,
+    letterSpacing: 2,
+    color: colors.secondary,
+  },
+
+  heading: {
+    fontFamily: fonts.heading,
+    fontSize: 30,
+    color: colors.primary,
+    textAlign: "center",
+    marginBottom: 10,
+  },
+
+  description: {
+    fontFamily: fonts.body,
+    fontSize: 14,
+    lineHeight: 22,
     color: colors.muted,
+    textAlign: "center",
+    paddingHorizontal: 18,
+  },
+
+  collectionInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 22,
+    marginBottom: 30,
+    gap: 9,
+  },
+
+  collectionIcon: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: "#F0E8D8",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  collectionCount: {
+    fontFamily: fonts.bodyMedium,
+    fontSize: 12,
+    color: colors.primary,
+  },
+
+  infoDot: {
+    width: 3,
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: colors.secondary,
+  },
+
+  collectionHint: {
+    fontFamily: fonts.body,
+    fontSize: 12,
+    color: colors.muted,
+  },
+
+  sectionHeading: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    marginBottom: 8,
+  },
+
+  sectionTitle: {
+    fontFamily: fonts.heading,
+    fontSize: 18,
+    color: colors.primary,
+  },
+
+  sectionLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colors.border,
+  },
+
+  prayerItem: {
+    flexDirection: "row",
+    paddingVertical: 20,
+  },
+
+  numberColumn: {
+    width: 42,
+    alignItems: "center",
+    marginRight: 12,
+  },
+
+  numberCircle: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    borderWidth: 1,
+    borderColor: "#DCC99F",
+    backgroundColor: "#F5F0E5",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  numberText: {
+    fontFamily: fonts.bodyMedium,
+    fontSize: 11,
+    color: colors.primary,
+  },
+
+  verticalLine: {
+    width: 1,
+    flex: 1,
+    minHeight: 40,
+    backgroundColor: colors.border,
+    marginTop: 10,
+  },
+
+  prayerContent: {
+    flex: 1,
+    paddingTop: 2,
+  },
+
+  prayerTop: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+
+  prayerLabel: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 10,
+    letterSpacing: 1.2,
+    color: colors.secondary,
+    flex: 1,
+    marginRight: 10,
+  },
+
+  prayerPreview: {
+    fontFamily: fonts.heading,
+    color: colors.text,
+    marginBottom: 14,
+  },
+
+  readRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 7,
+  },
+
+  readText: {
+    fontFamily: fonts.bodyMedium,
+    fontSize: 12,
+    color: colors.primary,
+  },
+
+  separator: {
+    height: 1,
+    backgroundColor: colors.border,
+    marginLeft: 54,
+    opacity: 0.65,
+  },
+
+  emptyState: {
+    alignItems: "center",
+    paddingTop: 70,
+    paddingHorizontal: 20,
+  },
+
+  emptyIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: "#F0E8D8",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 18,
+  },
+
+  emptyTitle: {
+    fontFamily: fonts.heading,
+    fontSize: 19,
+    color: colors.primary,
+    marginBottom: 8,
+  },
+
+  emptyDescription: {
+    fontFamily: fonts.body,
+    fontSize: 13,
+    color: colors.muted,
+    textAlign: "center",
+    lineHeight: 20,
   },
 });
