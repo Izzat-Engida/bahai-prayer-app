@@ -5,7 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const Favorites = () => {
   return (
      <SafeAreaView
-    edges={['top','left','right']}
+    edges={['left','right']}
     className="flex-1 bg-neutral p-6"
     >
 

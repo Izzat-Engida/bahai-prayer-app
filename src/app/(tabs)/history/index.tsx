@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const History = () => {
   return (
      <SafeAreaView
-    edges={['top','left','right']}
+    edges={['left','right']}
     className="flex-1 bg-neutral p-6"
     >
 

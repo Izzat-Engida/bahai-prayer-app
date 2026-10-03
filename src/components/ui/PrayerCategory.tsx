@@ -10,6 +10,7 @@ import { Ionicons } from "@expo/vector-icons";
 import type { TagRaw } from "../../types/prayer.types";
 import { colors, fonts } from "../../constants/theme";
 import CategoryIllustration, { type ArtType } from "./CategoryIllustration";
+import { useFontSize } from "../../hooks/useFontSize";
 
 type PrayerCategoryProps = TagRaw & {
   onPress?: () => void;
@@ -175,6 +176,7 @@ const PrayerCategory = ({
   PrayerCount,
   onPress,
 }: PrayerCategoryProps) => {
+  const { scaledSize } = useFontSize();
   const palette = palettes[
     (Math.abs(Number(Id) || 1) - 1) % palettes.length
   ];
@@ -214,12 +216,15 @@ const PrayerCategory = ({
       </View>
 
       <View style={styles.content}>
-        <Text style={styles.categoryName} numberOfLines={2}>
+        <Text
+          style={[styles.categoryName, { fontSize: scaledSize(16), lineHeight: scaledSize(23) }]}
+          numberOfLines={3}
+        >
           {Name}
         </Text>
 
         <View style={styles.footer}>
-          <Text style={styles.count}>
+          <Text style={[styles.count, { fontSize: scaledSize(12) }]}>
             {PrayerCount} {Number(PrayerCount) === 1 ? "prayer" : "prayers"}
           </Text>
           <View

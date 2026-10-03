@@ -17,6 +17,12 @@ import {
   AtkinsonHyperlegibleNext_700Bold,
 } from "@expo-google-fonts/atkinson-hyperlegible-next";
 
+import { Provider } from "react-redux";
+import { PersistGate } from "redux-persist/integration/react";
+import { store, persistor } from "../store";
+
+import { StatusBar } from "expo-status-bar";
+
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -37,14 +43,23 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
 
   return (
-    <SafeAreaProvider>
-        <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen
-          name="prayer/[id]"
-          options={{ animation: "slide_from_right" }}
-        />
-      </Stack>
-    </SafeAreaProvider>
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <SafeAreaProvider>
+          <StatusBar style="dark" />
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen
+              name="prayers/[categoryId]"
+              options={{ animation: "slide_from_right" }}
+            />
+            <Stack.Screen
+              name="prayers/read/[readId]"
+              options={{ animation: "slide_from_right" }}
+            />
+          </Stack>
+        </SafeAreaProvider>
+      </PersistGate>
+    </Provider>
   );
 }

@@ -13,6 +13,8 @@ import { Ionicons } from "@expo/vector-icons";
 
 import { usePrayerTags } from "../../../hooks/usePrayerTags";
 import PrayerCategory from "@/components/ui/PrayerCategory";
+import { router } from "expo-router";
+import { useFontSize } from "../../../hooks/useFontSize";
 
 const filters = [
   { label: "All", value: "ALL" },
@@ -23,6 +25,7 @@ const filters = [
 ];
 
 const Prayers = () => {
+  const { scaledSize } = useFontSize();
   const [search, setSearch] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("ALL");
 
@@ -57,7 +60,7 @@ const Prayers = () => {
 
   return (
     <SafeAreaView
-      edges={["top", "left", "right"]}
+      edges={["left", "right"]}
       className="flex-1 bg-neutral"
     >
       <FlatList
@@ -67,14 +70,20 @@ const Prayers = () => {
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
           <View className="mb-6">
-            <Text className="font-heading text-2xl text-text mb-2">
+            <Text
+              className="font-heading text-text mb-2"
+              style={{ fontSize: scaledSize(24) }}
+            >
               Prayer Categories
             </Text>
-            <Text className="font-body text-sm text-muted mb-5">
+            <Text
+              className="font-body text-muted mb-5"
+              style={{ fontSize: scaledSize(14) }}
+            >
               Explore prayers for different moments and occasions.
             </Text>
 
-            {/* Search bar */}
+           
             <View className="flex-row items-center bg-white border border-border rounded-2xl px-4 h-12 mb-5">
               <Ionicons name="search-outline" size={20} color="#8D8982" />
               <TextInput
@@ -140,6 +149,15 @@ const Prayers = () => {
               LanguageId={item.LanguageId}
               Name={item.Name}
               PrayerCount={item.PrayerCount}
+              onPress={() => {
+                router.push({
+                  pathname: "/prayers/[categoryId]",
+                  params: {
+                    categoryId: String(item.Id),
+                    categoryName: item.Name,
+                  },
+                });
+              }}
             />
           </View>
         )}
