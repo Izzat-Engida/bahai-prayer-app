@@ -1,11 +1,17 @@
 import { View, Text } from 'react-native'
-import React from 'react'
+import { SafeAreaView } from "react-native-safe-area-context";
+import {useState} from 'react'
+import { Ionicons } from "@expo/vector-icons";
 
 const Prayers = () => {
+  const [search,SetSearch]=useState('');
   return (
-    <View>
-      <Text>Prayers</Text>
-    </View>
+    <SafeAreaView
+    edges={['top','left','right']}
+    className="flex-1 bg-neutral p-6"
+    >
+
+    </SafeAreaView>
   )
 }
 

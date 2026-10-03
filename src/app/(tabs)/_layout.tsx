@@ -10,7 +10,7 @@ const TabLayout = () => {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.secondary,
+        tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.muted,
 
         tabBarStyle: {
@@ -19,12 +19,15 @@ const TabLayout = () => {
           borderTopWidth: 1,
           height: 64 + insets.bottom,
           paddingTop: 8,
+          paddingHorizontal:6,
           paddingBottom: Math.max(insets.bottom, 8),
+          marginBottom:20,
+          borderRadius:50
         },
 
         tabBarLabelStyle: {
           fontFamily: "AtkinsonMedium",
-          fontSize: 11,
+          fontSize: 14,
           fontWeight: "bold",
         },
 

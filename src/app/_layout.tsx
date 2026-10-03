@@ -38,10 +38,13 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <Stack screenOptions={{ headerShown: false }} />
-      <Stack.Screen name="(tabs)"/>
-      <Stack.Screen name="prayer/[id]" options={{animation:"slide_from_right"}}/>
-
+        <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen
+          name="prayer/[id]"
+          options={{ animation: "slide_from_right" }}
+        />
+      </Stack>
     </SafeAreaProvider>
   );
 }
