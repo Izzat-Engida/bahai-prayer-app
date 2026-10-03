@@ -41,7 +41,7 @@ const Prayers = () => {
     [obligatoryTags, generalTags, occasionalTags, tabletTags]
   );
 
-  // Apply category and search filters.
+  
   const filteredTags = useMemo(() => {
     return allTags.filter((tag) => {
       const matchesFilter =
