@@ -22,7 +22,7 @@ import { useAppDispatch, useAppSelector } from "../../../store";
 import { setUseOnlineAudio, setReadingSpeed } from "../../../store/slices/settingsSlice";
 import PrayerTextRenderer from "../../../components/ui/PrayerTextRenderer";
 import PrayerAudioPlayerBar from "../../../components/ui/PrayerAudioPlayerBar";
-import { stripHtml } from "../../../utils/textUtils";
+import { stripHtml, getAuthorName } from "../../../utils/textUtils";
 import { colors, fonts } from "../../../constants/theme";
 import { recordHistory, isFavorite, toggleFavorite } from "../../../services/database";
 import { isHiddenWordId } from "../../../services/hiddenWordsService";
@@ -51,7 +51,7 @@ export default function PrayerReadScreen() {
   const prayer = usePrayerDetails(activeReadId);
   const { scaledSize } = useFontSize();
 
-  // Record history & load initial bookmark state whenever activeReadId changes
+
   useEffect(() => {
     if (activeReadId) {
       recordHistory(activeReadId);
@@ -59,7 +59,7 @@ export default function PrayerReadScreen() {
     }
   }, [activeReadId]);
 
-  // Category context for switching prayers in the same category
+ 
   const isObligatory = useMemo(() => {
     if (!prayer) return false;
     return prayer.Tags.some(
@@ -198,7 +198,7 @@ export default function PrayerReadScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
-      {/* Top Header Bar with Action Icons */}
+
       <View style={styles.topBar}>
         <TouchableOpacity
           onPress={() => router.back()}
@@ -210,7 +210,7 @@ export default function PrayerReadScreen() {
         </TouchableOpacity>
 
         <View style={styles.rightActionsRow}>
-          {/* Font Size Modal Trigger (Aa) */}
+         
           <TouchableOpacity
             onPress={() => setFontModalVisible(true)}
             style={styles.iconButton}
@@ -220,7 +220,7 @@ export default function PrayerReadScreen() {
             <Text style={styles.fontAdjustIconText}>Aa</Text>
           </TouchableOpacity>
 
-          {/* Bookmark / Favorite Icon */}
+          
           <TouchableOpacity
             onPress={toggleBookmark}
             style={styles.iconButton}
@@ -234,7 +234,7 @@ export default function PrayerReadScreen() {
             />
           </TouchableOpacity>
 
-          {/* Share Button */}
+       
           <TouchableOpacity
             onPress={handleShare}
             style={styles.iconButton}
@@ -246,7 +246,7 @@ export default function PrayerReadScreen() {
         </View>
       </View>
 
-      {/* Category Navigation Bar (< Category Name >) */}
+    
       {categoryPrayers.length > 0 ? (
         <View style={styles.categoryNavRow}>
           <TouchableOpacity
@@ -286,7 +286,7 @@ export default function PrayerReadScreen() {
         </View>
       ) : null}
 
-      {/* Prayer Content Area */}
+
       {prayer ? (
         <View style={styles.flexOne} {...panResponder.panHandlers}>
           <ScrollView
@@ -294,12 +294,13 @@ export default function PrayerReadScreen() {
             showsVerticalScrollIndicator={false}
           >
             <View style={styles.prayerMainWrapper}>
-              {/* Audio Player Bar at top of prayer */}
+              
               <PrayerAudioPlayerBar prayer={prayer} />
 
               <PrayerTextRenderer
                 html={prayer.Text}
                 zoomScale={zoomScale}
+                authorName={getAuthorName(prayer.AuthorId)}
                 isHiddenWord={isHiddenWordId(activeReadId)}
               />
             </View>
@@ -314,7 +315,7 @@ export default function PrayerReadScreen() {
         </View>
       )}
 
-      {/* Font & Reading Settings Modal */}
+    
       <Modal
         visible={isFontModalVisible}
         transparent={true}
@@ -340,7 +341,6 @@ export default function PrayerReadScreen() {
               </TouchableOpacity>
             </View>
 
-            {/* Font Size Scale */}
             <View style={styles.modalSection}>
               <Text style={styles.sectionLabel}>Font Size</Text>
               <View style={styles.presetPillsRow}>
@@ -375,7 +375,7 @@ export default function PrayerReadScreen() {
               </View>
             </View>
 
-            {/* Reading Speed Setting */}
+           
             <View style={styles.modalSection}>
               <Text style={styles.sectionLabel}>
                 Reading Speed ({readingSpeed}x)
@@ -407,7 +407,7 @@ export default function PrayerReadScreen() {
               </View>
             </View>
 
-            {/* Online Audio Setting */}
+           
             <View style={styles.modalSwitchRow}>
               <View style={styles.switchTextGroup}>
                 <Text style={styles.sectionLabel}>Online Audio Source</Text>

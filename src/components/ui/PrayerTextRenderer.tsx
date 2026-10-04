@@ -200,7 +200,7 @@ export default function PrayerTextRenderer({
             selectable={true}
             style={[
               styles.authorText,
-              { fontSize: scaledSize(16) * zoomScale },
+              { fontSize: scaledSize(20) * zoomScale },
             ]}
           >
             — {authorName}
