@@ -12,15 +12,17 @@ import {
 } from "redux-persist";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import fontSizeReducer from "./slices/fontSizeSlice";
+import settingsReducer from "./slices/settingsSlice";
 
 const persistConfig = {
   key: "root",
   storage: AsyncStorage,
-  whitelist: ["fontSize"],
+  whitelist: ["fontSize", "settings"],
 };
 
 const rootReducer = combineReducers({
   fontSize: fontSizeReducer,
+  settings: settingsReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

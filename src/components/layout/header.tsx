@@ -6,12 +6,15 @@ import {
   StyleSheet,
   Modal,
   Pressable,
+  Switch,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import Svg, { Polygon, Circle } from "react-native-svg";
 import { colors, fonts } from "../../constants/theme";
 import { useFontSize } from "../../hooks/useFontSize";
+import { useAppDispatch, useAppSelector } from "../../store";
+import { setUseOnlineAudio, setReadingSpeed } from "../../store/slices/settingsSlice";
 
 type HeaderProps = {
   title?: string;
@@ -84,6 +87,9 @@ export default function Header({
   onSettingsPress,
 }: HeaderProps) {
   const insets = useSafeAreaInsets();
+  const dispatch = useAppDispatch();
+  const { useOnlineAudio, readingSpeed } = useAppSelector((state) => state.settings);
+
   const { increaseFont, decreaseFont, fontScale, resetFont, scaledSize } =
     useFontSize();
   const [showSettingsModal, setShowSettingsModal] = useState(false);
@@ -104,7 +110,6 @@ export default function Header({
       ]}
     >
       <View style={styles.content}>
-        
         <View style={styles.leftGroup}>
           <BahaiStarIcon size={38} color={colors.secondary} />
           <Text
@@ -115,7 +120,6 @@ export default function Header({
           </Text>
         </View>
 
-     
         <View style={styles.rightGroup}>
           <TouchableOpacity
             onPress={decreaseFont}
@@ -153,7 +157,7 @@ export default function Header({
         </View>
       </View>
 
-   
+      {/* Settings Modal */}
       <Modal
         visible={showSettingsModal}
         transparent
@@ -171,7 +175,7 @@ export default function Header({
             <View style={styles.modalHeader}>
               <View style={styles.modalTitleRow}>
                 <BahaiStarIcon size={28} color={colors.secondary} />
-                <Text style={styles.modalTitle}>Settings</Text>
+                <Text style={styles.modalTitle}>App Settings</Text>
               </View>
               <TouchableOpacity onPress={() => setShowSettingsModal(false)}>
                 <Ionicons name="close" size={22} color={colors.muted} />
@@ -179,30 +183,83 @@ export default function Header({
             </View>
 
             <View style={styles.modalBody}>
-              <Text style={styles.modalLabel}>
-                Font Scale: {Math.round(fontScale * 100)}%
-              </Text>
-              <View style={styles.modalFontControls}>
-                <TouchableOpacity
-                  style={styles.modalActionButton}
-                  onPress={decreaseFont}
-                >
-                  <Text style={styles.modalActionButtonText}>A- (Smaller)</Text>
-                </TouchableOpacity>
+              {/* Online Audio / TTS Source Setting */}
+              <View style={styles.settingRow}>
+                <View style={styles.settingTextGroup}>
+                  <Text style={styles.settingLabel}>Online Audio Source</Text>
+                  <Text style={styles.settingSubtext}>
+                    Use online voice when connected, or offline device TTS.
+                  </Text>
+                </View>
+                <Switch
+                  value={useOnlineAudio}
+                  onValueChange={(val) => {
+                    dispatch(setUseOnlineAudio(val));
+                  }}
+                  trackColor={{ false: colors.border, true: colors.primary }}
+                  thumbColor={colors.surface}
+                />
+              </View>
 
-                <TouchableOpacity
-                  style={[styles.modalActionButton, styles.modalResetButton]}
-                  onPress={resetFont}
-                >
-                  <Text style={styles.modalResetButtonText}>Reset</Text>
-                </TouchableOpacity>
+              {/* Reading Speed Setting */}
+              <View style={styles.settingGroup}>
+                <Text style={styles.settingLabel}>
+                  Reading Speed: {readingSpeed}x
+                </Text>
+                <View style={styles.speedPillsRow}>
+                  {[0.75, 1.0, 1.25, 1.5].map((speed) => {
+                    const isActive = readingSpeed === speed;
+                    return (
+                      <TouchableOpacity
+                        key={speed}
+                        onPress={() => dispatch(setReadingSpeed(speed))}
+                        style={[
+                          styles.speedPill,
+                          isActive && styles.speedPillActive,
+                        ]}
+                        activeOpacity={0.7}
+                      >
+                        <Text
+                          style={[
+                            styles.speedPillText,
+                            isActive && styles.speedPillTextActive,
+                          ]}
+                        >
+                          {speed}x
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              </View>
 
-                <TouchableOpacity
-                  style={styles.modalActionButton}
-                  onPress={increaseFont}
-                >
-                  <Text style={styles.modalActionButtonText}>A+ (Larger)</Text>
-                </TouchableOpacity>
+              {/* Font Scale Setting */}
+              <View style={styles.settingGroup}>
+                <Text style={styles.settingLabel}>
+                  App Font Scale: {Math.round(fontScale * 100)}%
+                </Text>
+                <View style={styles.modalFontControls}>
+                  <TouchableOpacity
+                    style={styles.modalActionButton}
+                    onPress={decreaseFont}
+                  >
+                    <Text style={styles.modalActionButtonText}>A- (Smaller)</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.modalActionButton, styles.modalResetButton]}
+                    onPress={resetFont}
+                  >
+                    <Text style={styles.modalResetButtonText}>Reset</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.modalActionButton}
+                    onPress={increaseFont}
+                  >
+                    <Text style={styles.modalActionButtonText}>A+ (Larger)</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
           </Pressable>
@@ -219,7 +276,7 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border,
     paddingHorizontal: 16,
     paddingBottom: 10,
-    borderRadius:10
+    borderRadius: 10,
   },
   content: {
     flexDirection: "row",
@@ -318,17 +375,63 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   modalBody: {
+    gap: 18,
+  },
+  settingGroup: {
+    gap: 8,
+  },
+  settingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     gap: 12,
   },
-  modalLabel: {
+  settingTextGroup: {
+    flex: 1,
+  },
+  settingLabel: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 13,
+    color: colors.primary,
+  },
+  settingSubtext: {
+    fontFamily: fonts.body,
+    fontSize: 11,
+    color: colors.muted,
+    marginTop: 2,
+  },
+  speedPillsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 4,
+  },
+  speedPill: {
+    flex: 1,
+    paddingVertical: 8,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.background,
+    alignItems: "center",
+  },
+  speedPillActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  speedPillText: {
     fontFamily: fonts.bodyMedium,
-    fontSize: 14,
+    fontSize: 12,
     color: colors.text,
+  },
+  speedPillTextActive: {
+    color: colors.surface,
   },
   modalFontControls: {
     flexDirection: "row",
     justifyContent: "space-between",
     gap: 8,
+    marginTop: 4,
   },
   modalActionButton: {
     flex: 1,

@@ -208,3 +208,25 @@ export function getPrayerPreview(html: string | null | undefined): string {
 
   return previewText.replace(/\s+/g, " ").trim();
 }
+
+/**
+ * Returns clean prayer text specifically for Audio Reading / TTS,
+ * strictly excluding instructions, section headings, and footnotes.
+ */
+export function getSpeechText(html: string | null | undefined): string {
+  if (!html) return "";
+  const blocks = parsePrayerBlocks(html);
+
+  const spokenBlocks = blocks.filter(
+    (b) => b.type === "invocation" || b.type === "dropCap" || b.type === "p"
+  );
+
+  if (spokenBlocks.length > 0) {
+    return spokenBlocks
+      .map((b) => b.rawContent.replace(/<[^>]+>/g, "").trim())
+      .filter(Boolean)
+      .join(". ");
+  }
+
+  return stripHtml(html);
+}
