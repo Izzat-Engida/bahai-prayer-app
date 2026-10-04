@@ -18,10 +18,10 @@ import { usePrayerDetails } from "../../../hooks/usePrayerDetails";
 import { usePrayersByTag } from "../../../hooks/usePrayersByTag";
 import { OBLIGATORY_CATEGORY_ID } from "../../../hooks/usePrayerTags";
 import { useFontSize } from "../../../hooks/useFontSize";
-import { useSpeechReader } from "../../../hooks/useSpeechReader";
 import { useAppDispatch, useAppSelector } from "../../../store";
 import { setUseOnlineAudio, setReadingSpeed } from "../../../store/slices/settingsSlice";
 import PrayerTextRenderer from "../../../components/ui/PrayerTextRenderer";
+import PrayerAudioPlayerBar from "../../../components/ui/PrayerAudioPlayerBar";
 import { stripHtml } from "../../../utils/textUtils";
 import { colors, fonts } from "../../../constants/theme";
 import { recordHistory, isFavorite, toggleFavorite } from "../../../services/database";
@@ -49,14 +49,12 @@ export default function PrayerReadScreen() {
 
   const prayer = usePrayerDetails(activeReadId);
   const { scaledSize } = useFontSize();
-  const { isPlaying, activePrayerId, togglePlay, stopReading } = useSpeechReader();
 
   // Record history & load initial bookmark state whenever activeReadId changes
   useEffect(() => {
     if (activeReadId) {
       recordHistory(activeReadId);
       setIsBookmarked(isFavorite(activeReadId));
-      stopReading();
     }
   }, [activeReadId]);
 
@@ -94,7 +92,6 @@ export default function PrayerReadScreen() {
 
   const goToPrev = () => {
     if (hasPrev) {
-      stopReading();
       const prevPrayer = categoryPrayers[currentIndex - 1];
       setActiveReadId(prevPrayer.Id);
     }
@@ -102,7 +99,6 @@ export default function PrayerReadScreen() {
 
   const goToNext = () => {
     if (hasNext) {
-      stopReading();
       const nextPrayer = categoryPrayers[currentIndex + 1];
       setActiveReadId(nextPrayer.Id);
     }
@@ -175,14 +171,6 @@ export default function PrayerReadScreen() {
   const zoomOut = () => setZoomScale((prev) => Math.max(prev - 0.15, 0.75));
   const resetZoom = () => setZoomScale(1);
 
-  const isReadingThisPrayer = isPlaying && activePrayerId === activeReadId;
-
-  const handleToggleAudio = () => {
-    if (!prayer || !activeReadId) return;
-    const onlineUrl = prayer.Urls?.[0]?.Url;
-    togglePlay(activeReadId, prayer.Text, onlineUrl);
-  };
-
   const handleShare = async () => {
     if (!prayer) return;
     const cleanText = stripHtml(prayer.Text);
@@ -212,10 +200,7 @@ export default function PrayerReadScreen() {
       {/* Top Header Bar with Action Icons */}
       <View style={styles.topBar}>
         <TouchableOpacity
-          onPress={() => {
-            stopReading();
-            router.back();
-          }}
+          onPress={() => router.back()}
           style={styles.iconButton}
           activeOpacity={0.7}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
@@ -224,23 +209,6 @@ export default function PrayerReadScreen() {
         </TouchableOpacity>
 
         <View style={styles.rightActionsRow}>
-          {/* Audio Play/Pause Button */}
-          <TouchableOpacity
-            onPress={handleToggleAudio}
-            style={[
-              styles.audioButton,
-              isReadingThisPrayer && styles.activeAudioButton,
-            ]}
-            activeOpacity={0.8}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          >
-            <Ionicons
-              name={isReadingThisPrayer ? "pause" : "volume-high"}
-              size={22}
-              color="#FFFFFF"
-            />
-          </TouchableOpacity>
-
           {/* Font Size Modal Trigger (Aa) */}
           <TouchableOpacity
             onPress={() => setFontModalVisible(true)}
@@ -325,6 +293,9 @@ export default function PrayerReadScreen() {
             showsVerticalScrollIndicator={false}
           >
             <View style={styles.prayerMainWrapper}>
+              {/* Audio Player Bar at top of prayer */}
+              <PrayerAudioPlayerBar prayer={prayer} />
+
               <PrayerTextRenderer html={prayer.Text} zoomScale={zoomScale} />
             </View>
           </ScrollView>
@@ -481,24 +452,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  audioButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: colors.primary,
-    alignItems: "center",
-    justifyContent: "center",
-    elevation: 4,
-    shadowColor: "#1B2A4A",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-  },
-  activeAudioButton: {
-    backgroundColor: colors.secondary,
-    shadowColor: colors.secondary,
-    elevation: 6,
-  },
   rightActionsRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -542,7 +495,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 22,
     paddingVertical: 20,
-    paddingBottom: 50,
+    paddingBottom: 110,
   },
   prayerMainWrapper: {
     width: "100%",
