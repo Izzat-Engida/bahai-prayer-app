@@ -5,6 +5,8 @@ import type { PrayerRaw } from "../../types/prayer.types";
 import { colors, fonts } from "../../constants/theme";
 import { useFontSize } from "../../hooks/useFontSize";
 
+import { getPrayerPreview } from "../../utils/textUtils";
+
 type PrayerListItemProps = {
   prayer: PrayerRaw;
   index: number;
@@ -19,7 +21,7 @@ export default function PrayerListItem({
   onBookmarkPress,
 }: PrayerListItemProps) {
   const { scaledSize } = useFontSize();
-  const preview = prayer.Text.replace(/\s+/g, " ").trim();
+  const preview = getPrayerPreview(prayer.Text);
 
   return (
     <TouchableOpacity
@@ -27,26 +29,17 @@ export default function PrayerListItem({
       style={styles.prayerItem}
       onPress={onPress}
     >
-      <View style={styles.numberColumn}>
-        <View style={styles.numberCircle}>
-          <Text style={styles.numberText}>
-            {String(index + 1).padStart(2, "0")}
-          </Text>
-        </View>
-        <View style={styles.verticalLine} />
-      </View>
+     
 
       <View style={styles.prayerContent}>
         <View style={styles.prayerTop}>
-          <Text style={styles.prayerLabel}>
-            {prayer.FirstTagName || "BAHÁ’Í PRAYER"}
-          </Text>
+        
 
           <TouchableOpacity
             onPress={onBookmarkPress}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Ionicons name="bookmark-outline" size={17} color={colors.muted} />
+            <Ionicons className="font-bold" name="bookmark-outline" size={17} color={colors.muted} />
           </TouchableOpacity>
         </View>
 
@@ -111,7 +104,7 @@ const styles = StyleSheet.create({
   prayerTop: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "flex-end",
     marginBottom: 10,
   },
   prayerLabel: {

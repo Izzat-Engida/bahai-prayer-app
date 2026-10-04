@@ -54,9 +54,7 @@ export default function CategoryPrayersScreen() {
 
             <Text style={styles.heading}>{name}</Text>
 
-            <Text style={styles.description}>
-              Words for reflection, devotion, and spiritual connection.
-            </Text>
+           
 
             <View style={styles.collectionInfo}>
               <View style={styles.collectionIcon}>
@@ -71,13 +69,11 @@ export default function CategoryPrayersScreen() {
                 {prayers.length} {prayers.length === 1 ? "prayer" : "prayers"}
               </Text>
 
-              <View style={styles.infoDot} />
-
-              <Text style={styles.collectionHint}>Take a moment to reflect</Text>
+              
             </View>
 
             <View style={styles.sectionHeading}>
-              <Text style={styles.sectionTitle}>Explore prayers</Text>
+         
               <View style={styles.sectionLine} />
             </View>
           </View>
@@ -89,7 +85,11 @@ export default function CategoryPrayersScreen() {
             onPress={() =>
               router.push({
                 pathname: "/prayers/read/[readId]",
-                params: { readId: String(item.Id) },
+                params: {
+                  readId: String(item.Id),
+                  categoryId: String(categoryId),
+                  categoryName: name,
+                },
               })
             }
           />
