@@ -15,6 +15,32 @@ export interface PrayerBlock {
 }
 
 /**
+ * Returns the human-readable Author/Revealer name from AuthorId.
+ */
+export function getAuthorName(authorId?: number | null): string {
+  switch (authorId) {
+    case 1:
+      return "The Báb";
+    case 2:
+      return "Bahá’u’lláh";
+    case 3:
+      return "‘Abdu’l-Bahá";
+    default:
+      return "";
+  }
+}
+
+/**
+ * Calculates word count of stripped prayer text.
+ */
+export function getWordCount(html?: string | null): number {
+  if (!html) return 0;
+  const clean = stripHtml(html);
+  if (!clean) return 0;
+  return clean.split(/\s+/).filter(Boolean).length;
+}
+
+/**
  * Strips all HTML tags from a text string and cleans up whitespace.
  * Useful for list item previews, search items, notifications, etc.
  */
@@ -182,4 +208,3 @@ export function getPrayerPreview(html: string | null | undefined): string {
 
   return previewText.replace(/\s+/g, " ").trim();
 }
-

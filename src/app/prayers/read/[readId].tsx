@@ -20,6 +20,7 @@ import { useFontSize } from "../../../hooks/useFontSize";
 import PrayerTextRenderer from "../../../components/ui/PrayerTextRenderer";
 import { stripHtml } from "../../../utils/textUtils";
 import { colors, fonts } from "../../../constants/theme";
+import { recordHistory, isFavorite, toggleFavorite } from "../../../services/database";
 
 export default function PrayerReadScreen() {
   const { readId, categoryId: paramCategoryId, categoryName: paramCategoryName } =
@@ -39,10 +40,18 @@ export default function PrayerReadScreen() {
     }
   }, [readId]);
 
+
+  useEffect(() => {
+    if (activeReadId) {
+      recordHistory(activeReadId);
+      setIsBookmarked(isFavorite(activeReadId));
+    }
+  }, [activeReadId]);
+
   const prayer = usePrayerDetails(activeReadId);
   const { scaledSize } = useFontSize();
 
-  // Category context for switching prayers in the same category
+  
   const isObligatory = useMemo(() => {
     if (!prayer) return false;
     return prayer.Tags.some(
@@ -88,12 +97,12 @@ export default function PrayerReadScreen() {
     }
   };
 
-  // Font zoom state & modal visibility
+  
   const [zoomScale, setZoomScale] = useState(1);
   const [isFontModalVisible, setFontModalVisible] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
 
-  // Swipe & pinch gesture responder
+
   const initialDistanceRef = useRef<number | null>(null);
   const baseScaleRef = useRef(1);
 
@@ -101,15 +110,15 @@ export default function PrayerReadScreen() {
     () =>
       PanResponder.create({
         onStartShouldSetPanResponder: (evt) => {
-          // Only grab touch start if 2 fingers touch for pinch-zoom
+       
           return evt.nativeEvent.touches.length === 2;
         },
         onMoveShouldSetPanResponder: (evt, gestureState) => {
-          // 2 fingers = Pinch zoom
+         
           if (evt.nativeEvent.touches.length === 2) {
             return true;
           }
-          // 1 finger: ONLY capture if movement is clearly a horizontal swipe (not vertical scrolling)
+          
           const isHorizontal =
             Math.abs(gestureState.dx) > 40 &&
             Math.abs(gestureState.dx) > Math.abs(gestureState.dy) * 2.2;
@@ -176,7 +185,10 @@ export default function PrayerReadScreen() {
   };
 
   const toggleBookmark = () => {
-    setIsBookmarked((prev) => !prev);
+    if (activeReadId) {
+      const newState = toggleFavorite(activeReadId);
+      setIsBookmarked(newState);
+    }
   };
 
   return (
@@ -193,7 +205,7 @@ export default function PrayerReadScreen() {
         </TouchableOpacity>
 
         <View style={styles.rightActionsRow}>
-          {/* Font Size Modal Trigger (Aa) */}
+
           <TouchableOpacity
             onPress={() => setFontModalVisible(true)}
             style={styles.iconButton}
@@ -203,7 +215,7 @@ export default function PrayerReadScreen() {
             <Text style={styles.fontAdjustIconText}>Aa</Text>
           </TouchableOpacity>
 
-          {/* Bookmark / Favorite Icon */}
+    
           <TouchableOpacity
             onPress={toggleBookmark}
             style={styles.iconButton}
@@ -217,7 +229,7 @@ export default function PrayerReadScreen() {
             />
           </TouchableOpacity>
 
-          {/* Share Button */}
+       
           <TouchableOpacity
             onPress={handleShare}
             style={styles.iconButton}
@@ -229,7 +241,6 @@ export default function PrayerReadScreen() {
         </View>
       </View>
 
-      {/* Category Navigation Bar (< Category Name >) */}
       {categoryPrayers.length > 0 ? (
         <View style={styles.categoryNavRow}>
           <TouchableOpacity
@@ -269,7 +280,7 @@ export default function PrayerReadScreen() {
         </View>
       ) : null}
 
-      {/* Prayer Content Area */}
+      
       {prayer ? (
         <View style={styles.flexOne} {...panResponder.panHandlers}>
           <ScrollView
@@ -290,7 +301,7 @@ export default function PrayerReadScreen() {
         </View>
       )}
 
-      {/* Font Size Modal */}
+      
       <Modal
         visible={isFontModalVisible}
         transparent={true}
@@ -316,7 +327,7 @@ export default function PrayerReadScreen() {
               </TouchableOpacity>
             </View>
 
-            {/* Size Controls */}
+           
             <View style={styles.sizeControlRow}>
               <TouchableOpacity
                 onPress={zoomOut}
@@ -341,7 +352,7 @@ export default function PrayerReadScreen() {
               </TouchableOpacity>
             </View>
 
-            {/* Quick Scale Presets */}
+            
             <View style={styles.presetPillsRow}>
               {[
                 { label: "80%", scale: 0.8 },
@@ -424,7 +435,7 @@ const styles = StyleSheet.create({
     color: colors.primary,
   },
 
-  // Category Navigation Sub-Header
+
   categoryNavRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -475,7 +486,7 @@ const styles = StyleSheet.create({
     color: colors.muted,
   },
 
-  // Font Size Modal Styles
+  
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.45)",

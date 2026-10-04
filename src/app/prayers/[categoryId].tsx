@@ -13,6 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 import { usePrayersByTag } from "../../hooks/usePrayersByTag";
 import { useFontSize } from "../../hooks/useFontSize";
+import { useFavorites } from "../../hooks/useFavorites";
 import PrayerListItem from "../../components/ui/PrayerListItem";
 import { colors, fonts } from "../../constants/theme";
 
@@ -25,6 +26,7 @@ export default function CategoryPrayersScreen() {
   const numericId = categoryId ? Number(categoryId) : null;
   const prayers = usePrayersByTag(numericId);
   const { scaledSize } = useFontSize();
+  const { favIds, toggleFav } = useFavorites();
 
   const name = categoryName || "Prayers";
 
@@ -82,6 +84,8 @@ export default function CategoryPrayersScreen() {
           <PrayerListItem
             prayer={item}
             index={index}
+            isBookmarked={favIds.includes(item.Id)}
+            onBookmarkPress={() => toggleFav(item.Id)}
             onPress={() =>
               router.push({
                 pathname: "/prayers/read/[readId]",

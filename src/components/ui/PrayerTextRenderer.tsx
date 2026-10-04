@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
     width: "100%",
   },
 
-  // Invocation Styling
+  
   invocationContainer: {
     alignItems: "center",
     justifyContent: "center",
@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
 
-  // Heading Styling
+  
   headingContainer: {
     alignItems: "center",
     marginTop: 22,
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
     borderRadius: 1,
   },
 
-  // Instruction Styling (No box, no icon, simple italic small text)
+  
   instructionContainer: {
     marginVertical: 10,
     paddingHorizontal: 2,
@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 
-  // Footnote Styling
+
   footnoteContainer: {
     marginTop: 20,
     paddingTop: 14,

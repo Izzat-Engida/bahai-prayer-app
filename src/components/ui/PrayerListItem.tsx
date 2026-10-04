@@ -4,14 +4,14 @@ import { Ionicons } from "@expo/vector-icons";
 import type { PrayerRaw } from "../../types/prayer.types";
 import { colors, fonts } from "../../constants/theme";
 import { useFontSize } from "../../hooks/useFontSize";
-
-import { getPrayerPreview } from "../../utils/textUtils";
+import { getPrayerPreview, getAuthorName, getWordCount } from "../../utils/textUtils";
 
 type PrayerListItemProps = {
   prayer: PrayerRaw;
   index: number;
   onPress: () => void;
   onBookmarkPress?: () => void;
+  isBookmarked?: boolean;
 };
 
 export default function PrayerListItem({
@@ -19,9 +19,19 @@ export default function PrayerListItem({
   index,
   onPress,
   onBookmarkPress,
+  isBookmarked = false,
 }: PrayerListItemProps) {
   const { scaledSize } = useFontSize();
   const preview = getPrayerPreview(prayer.Text);
+  const authorName = getAuthorName(prayer.AuthorId);
+  const tagName = prayer.FirstTagName || (prayer.Tags?.[0]?.Name ?? "");
+  const words = getWordCount(prayer.Text);
+
+  const metaParts: string[] = [];
+  if (authorName) metaParts.push(authorName);
+  if (tagName) metaParts.push(tagName);
+  if (words > 0) metaParts.push(`${words} words`);
+  const metaString = metaParts.join(" • ");
 
   return (
     <TouchableOpacity
@@ -29,20 +39,7 @@ export default function PrayerListItem({
       style={styles.prayerItem}
       onPress={onPress}
     >
-     
-
       <View style={styles.prayerContent}>
-        <View style={styles.prayerTop}>
-        
-
-          <TouchableOpacity
-            onPress={onBookmarkPress}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          >
-            <Ionicons className="font-bold" name="bookmark-outline" size={17} color={colors.muted} />
-          </TouchableOpacity>
-        </View>
-
         <Text
           style={[
             styles.prayerPreview,
@@ -56,9 +53,25 @@ export default function PrayerListItem({
           {preview}
         </Text>
 
-        <View style={styles.readRow}>
-          <Text style={styles.readText}>Read prayer</Text>
-          <Ionicons name="arrow-forward" size={15} color={colors.secondary} />
+        <View style={styles.metaRow}>
+          <TouchableOpacity
+            onPress={onBookmarkPress}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            style={styles.bookmarkBtn}
+          >
+            <Ionicons
+              name={isBookmarked ? "bookmark" : "bookmark-outline"}
+              size={18}
+              color={isBookmarked ? colors.secondary : colors.muted}
+            />
+          </TouchableOpacity>
+
+          <Text
+            style={[styles.metaText, { fontSize: scaledSize(12) }]}
+            numberOfLines={1}
+          >
+            {metaString}
+          </Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -67,67 +80,27 @@ export default function PrayerListItem({
 
 const styles = StyleSheet.create({
   prayerItem: {
-    flexDirection: "row",
-    paddingVertical: 20,
-  },
-  numberColumn: {
-    width: 42,
-    alignItems: "center",
-    marginRight: 12,
-  },
-  numberCircle: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    borderWidth: 1,
-    borderColor: "#DCC99F",
-    backgroundColor: "#F5F0E5",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  numberText: {
-    fontFamily: fonts.bodyMedium,
-    fontSize: 11,
-    color: colors.primary,
-  },
-  verticalLine: {
-    width: 1,
-    flex: 1,
-    minHeight: 40,
-    backgroundColor: colors.border,
-    marginTop: 10,
+    paddingVertical: 16,
   },
   prayerContent: {
     flex: 1,
-    paddingTop: 2,
-  },
-  prayerTop: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "flex-end",
-    marginBottom: 10,
-  },
-  prayerLabel: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 10,
-    letterSpacing: 1.2,
-    color: colors.secondary,
-    flex: 1,
-    marginRight: 10,
   },
   prayerPreview: {
     fontFamily: fonts.heading,
     color: colors.text,
-    marginBottom: 14,
+    marginBottom: 10,
   },
-  readRow: {
+  metaRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 7,
+    gap: 8,
   },
-  readText: {
+  bookmarkBtn: {
+    paddingRight: 2,
+  },
+  metaText: {
     fontFamily: fonts.bodyMedium,
-    fontSize: 12,
-    color: colors.primary,
+    color: colors.muted,
+    flex: 1,
   },
 });
