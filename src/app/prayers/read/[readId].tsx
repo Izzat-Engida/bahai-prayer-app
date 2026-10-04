@@ -25,6 +25,7 @@ import PrayerAudioPlayerBar from "../../../components/ui/PrayerAudioPlayerBar";
 import { stripHtml } from "../../../utils/textUtils";
 import { colors, fonts } from "../../../constants/theme";
 import { recordHistory, isFavorite, toggleFavorite } from "../../../services/database";
+import { isHiddenWordId } from "../../../services/hiddenWordsService";
 
 export default function PrayerReadScreen() {
   const dispatch = useAppDispatch();
@@ -296,7 +297,11 @@ export default function PrayerReadScreen() {
               {/* Audio Player Bar at top of prayer */}
               <PrayerAudioPlayerBar prayer={prayer} />
 
-              <PrayerTextRenderer html={prayer.Text} zoomScale={zoomScale} />
+              <PrayerTextRenderer
+                html={prayer.Text}
+                zoomScale={zoomScale}
+                isHiddenWord={isHiddenWordId(activeReadId)}
+              />
             </View>
           </ScrollView>
         </View>

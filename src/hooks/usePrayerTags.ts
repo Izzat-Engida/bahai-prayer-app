@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import prayers from '../../assets/data/prayersystembylanguage.json';
 import type { PrayerJsonFormat, TagRaw } from "../types/prayer.types";
+import { HIDDEN_WORDS_CATEGORY_ID } from "../services/hiddenWordsService";
 
 const data = prayers as PrayerJsonFormat;
 
@@ -26,6 +27,19 @@ export function usePrayerTags(kind: string | null) {
       ];
     }
 
-    return data.Tags.filter((tag) => tag.Kind === kind);
+    if (kind === "HIDDEN_WORDS") {
+      return [
+        {
+          Id: HIDDEN_WORDS_CATEGORY_ID,
+          LanguageId: 1,
+          Name: "The Hidden Words",
+          Kind: "HIDDEN_WORDS",
+          PrayerCount: 153,
+        },
+      ];
+    }
+
+    const tags = data.Tags.filter((tag) => tag.Kind === kind);
+    return tags;
   }, [kind]);
 }

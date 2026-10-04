@@ -7,15 +7,22 @@ import { useFontSize } from "../../hooks/useFontSize";
 interface PrayerTextRendererProps {
   html: string;
   zoomScale?: number;
+  authorName?: string;
+  isItalic?: boolean;
+  isHiddenWord?: boolean;
 }
 
 export default function PrayerTextRenderer({
   html,
   zoomScale = 1,
+  authorName,
+  isItalic = false,
+  isHiddenWord = false,
 }: PrayerTextRendererProps) {
   const { scaledSize } = useFontSize();
   const blocks = useMemo(() => parsePrayerBlocks(html), [html]);
 
+  const shouldBeItalic = isItalic || isHiddenWord;
   const baseFontSize = scaledSize(18) * zoomScale;
   const baseLineHeight = scaledSize(30) * zoomScale;
 
@@ -56,8 +63,9 @@ export default function PrayerTextRenderer({
               style={[
                 styles.invocationText,
                 {
-                  fontSize: scaledSize(21) * zoomScale,
-                  lineHeight: scaledSize(32) * zoomScale,
+                  fontSize: scaledSize(23) * zoomScale,
+                  lineHeight: scaledSize(34) * zoomScale,
+                  fontWeight: "bold",
                 },
               ]}
             >
@@ -165,19 +173,16 @@ export default function PrayerTextRenderer({
 
       case "p":
       default: {
+        const paragraphStyle = [
+          styles.bodyText,
+          { fontSize: baseFontSize, lineHeight: baseLineHeight },
+          shouldBeItalic && styles.italicText,
+        ];
+
         return (
           <View key={index} style={styles.paragraphContainer}>
-            <Text
-              selectable={true}
-              style={[
-                styles.bodyText,
-                { fontSize: baseFontSize, lineHeight: baseLineHeight },
-              ]}
-            >
-              {renderInlineSegments(block.segments, [
-                styles.bodyText,
-                { fontSize: baseFontSize, lineHeight: baseLineHeight },
-              ])}
+            <Text selectable={true} style={paragraphStyle}>
+              {renderInlineSegments(block.segments, paragraphStyle)}
             </Text>
           </View>
         );
@@ -185,7 +190,25 @@ export default function PrayerTextRenderer({
     }
   };
 
-  return <View style={styles.container}>{blocks.map(renderBlock)}</View>;
+  return (
+    <View style={styles.container}>
+      {blocks.map(renderBlock)}
+
+      {authorName ? (
+        <View style={styles.authorContainer}>
+          <Text
+            selectable={true}
+            style={[
+              styles.authorText,
+              { fontSize: scaledSize(16) * zoomScale },
+            ]}
+          >
+            — {authorName}
+          </Text>
+        </View>
+      ) : null}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -292,5 +315,19 @@ const styles = StyleSheet.create({
     fontFamily: fonts.body,
     fontStyle: "italic",
     color: colors.muted,
+  },
+
+  // Author attribution style (Bahá'í Prayer Book design)
+  authorContainer: {
+    marginTop: 24,
+    marginBottom: 16,
+    alignItems: "flex-end",
+    paddingRight: 8,
+  },
+  authorText: {
+    fontFamily: fonts.heading,
+    fontStyle: "italic",
+    color: colors.primary,
+    fontWeight: "600",
   },
 });

@@ -55,16 +55,16 @@ export default function PrayerAudioPlayerBar({ prayer }: PrayerAudioPlayerBarPro
 
   const readingUrlObj = useMemo(() => {
     if (!prayer.Urls || prayer.Urls.length === 0) return null;
-    return (
-      prayer.Urls.find((u) => {
-        if (!u.Url) return false;
-        const title = (u.Title || "").toLowerCase();
-        return (
-          title.includes("read") ||
-          title.includes("recitat")
-        );
-      }) ?? null
-    );
+    const match = prayer.Urls.find((u) => {
+      if (!u.Url) return false;
+      const title = (u.Title || "").toLowerCase();
+      return (
+        title.includes("read") ||
+        title.includes("recitat")
+      );
+    });
+    if (match) return match;
+    return prayer.Urls.find((u) => !!u.Url) ?? null;
   }, [prayer]);
 
   // Monitor network connectivity

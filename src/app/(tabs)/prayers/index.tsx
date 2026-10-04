@@ -15,10 +15,12 @@ import { usePrayerTags } from "../../../hooks/usePrayerTags";
 import PrayerCategory from "@/components/ui/PrayerCategory";
 import { router } from "expo-router";
 import { useFontSize } from "../../../hooks/useFontSize";
+import { HIDDEN_WORDS_CATEGORY_ID } from "../../../services/hiddenWordsService";
 
 const filters = [
   { label: "All", value: "ALL" },
   { label: "Obligatory", value: "OBLIGATORY" },
+  { label: "Hidden Words", value: "HIDDEN_WORDS" },
   { label: "General", value: "GENERAL" },
   { label: "Occasional", value: "OCCASSIONAL" },
   { label: "Tablets", value: "TABLETS" },
@@ -29,19 +31,21 @@ const Prayers = () => {
   const [search, setSearch] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("ALL");
 
+  const obligatoryTags = usePrayerTags("OBLIGATORY");
+  const hiddenWordsTags = usePrayerTags("HIDDEN_WORDS");
   const generalTags = usePrayerTags("GENERAL");
   const occasionalTags = usePrayerTags("OCCASSIONAL");
   const tabletTags = usePrayerTags("TABLETS");
-  const obligatoryTags = usePrayerTags("OBLIGATORY");
 
   const allTags = useMemo(
     () => [
       ...obligatoryTags,
+      ...hiddenWordsTags,
       ...generalTags,
       ...occasionalTags,
       ...tabletTags,
     ],
-    [obligatoryTags, generalTags, occasionalTags, tabletTags]
+    [obligatoryTags, hiddenWordsTags, generalTags, occasionalTags, tabletTags]
   );
 
   
@@ -150,13 +154,17 @@ const Prayers = () => {
               Name={item.Name}
               PrayerCount={item.PrayerCount}
               onPress={() => {
-                router.push({
-                  pathname: "/prayers/[categoryId]",
-                  params: {
-                    categoryId: String(item.Id),
-                    categoryName: item.Name,
-                  },
-                });
+                if (item.Id === HIDDEN_WORDS_CATEGORY_ID) {
+                  router.push("/prayers/hidden-words");
+                } else {
+                  router.push({
+                    pathname: "/prayers/[categoryId]",
+                    params: {
+                      categoryId: String(item.Id),
+                      categoryName: item.Name,
+                    },
+                  });
+                }
               }}
             />
           </View>

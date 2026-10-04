@@ -17,6 +17,8 @@ import { useFavorites } from "../../hooks/useFavorites";
 import PrayerListItem from "../../components/ui/PrayerListItem";
 import { colors, fonts } from "../../constants/theme";
 
+import { HIDDEN_WORDS_CATEGORY_ID } from "../../services/hiddenWordsService";
+
 export default function CategoryPrayersScreen() {
   const { categoryId, categoryName } = useLocalSearchParams<{
     categoryId: string;
@@ -24,6 +26,13 @@ export default function CategoryPrayersScreen() {
   }>();
 
   const numericId = categoryId ? Number(categoryId) : null;
+
+  React.useEffect(() => {
+    if (numericId === HIDDEN_WORDS_CATEGORY_ID) {
+      router.replace("/prayers/hidden-words");
+    }
+  }, [numericId]);
+
   const prayers = usePrayersByTag(numericId);
   const { scaledSize } = useFontSize();
   const { favIds, toggleFav } = useFavorites();

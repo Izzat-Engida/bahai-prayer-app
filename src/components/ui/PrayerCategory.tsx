@@ -157,6 +157,7 @@ const getArtType = (name: string, id: number | string): ArtType => {
     n.includes("epistle") ||
     n.includes("reference library") ||
     n.includes("tablets") ||
+    n.includes("hidden words") ||
     n.includes("tablet of ahmad")
   ) return "book";
 

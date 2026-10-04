@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo } from "react";
 import prayers from "../../assets/data/prayersystembylanguage.json";
 import type { PrayerJsonFormat, PrayerRaw } from "../types/prayer.types";
 import { getHistoryRecords, recordHistory as dbRecordHistory, HistoryRecord } from "../services/database";
+import { getAllHiddenWordsAsPrayers } from "../services/hiddenWordsService";
 
 const data = prayers as PrayerJsonFormat;
 
@@ -29,6 +30,7 @@ export function useHistory() {
 
     const map = new Map<number, PrayerRaw>();
     data.Prayers.forEach((p) => map.set(p.Id, p));
+    getAllHiddenWordsAsPrayers().forEach((hw) => map.set(hw.Id, hw));
 
     const now = new Date();
     const startOfToday = new Date(
@@ -72,6 +74,7 @@ export function useHistory() {
   const allHistoryPrayers = useMemo<PrayerRaw[]>(() => {
     const map = new Map<number, PrayerRaw>();
     data.Prayers.forEach((p) => map.set(p.Id, p));
+    getAllHiddenWordsAsPrayers().forEach((hw) => map.set(hw.Id, hw));
     return historyRecords.map((r) => map.get(r.prayerId)).filter(Boolean) as PrayerRaw[];
   }, [historyRecords]);
 
