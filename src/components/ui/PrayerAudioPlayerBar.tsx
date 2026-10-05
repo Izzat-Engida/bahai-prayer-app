@@ -7,7 +7,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as Speech from "expo-speech";
-import YoutubePlayer from "react-native-youtube-iframe";
+import YoutubeAudioPlayer from "./YoutubeAudioPlayer";
 import NetInfo from "@react-native-community/netinfo";
 import type { PrayerRaw } from "../../types/prayer.types";
 import { colors, fonts } from "../../constants/theme";
@@ -36,6 +36,7 @@ export default function PrayerAudioPlayerBar({ prayer }: PrayerAudioPlayerBarPro
   const [activeMode, setActiveMode] = useState<AudioMode>("tts");
   const [isPlaying, setIsPlaying] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
+  const [failedVideoIds, setFailedVideoIds] = useState<Set<string>>(new Set());
 
   // Check available online audio tracks (matching chant/song/son or reading/read)
   const chantUrlObj = useMemo(() => {
@@ -136,11 +137,12 @@ export default function PrayerAudioPlayerBar({ prayer }: PrayerAudioPlayerBarPro
     } else if (activeMode === "chant" || activeMode === "reading") {
       const targetUrlObj = activeMode === "chant" ? chantUrlObj : readingUrlObj;
       const yid = targetUrlObj ? extractYoutubeId(targetUrlObj.Url) : null;
+      const isFailed = yid ? failedVideoIds.has(yid) : false;
 
-      if (yid && isOnline) {
+      if (yid && isOnline && !isFailed) {
         setIsPlaying(true);
       } else {
-        // Fallback to TTS if offline or invalid URL
+        // Fallback to TTS if offline, invalid URL, or video previously failed
         const textToRead = getSpeechText(prayer.Text);
         if (!textToRead) return;
         setIsPlaying(true);
@@ -161,6 +163,7 @@ export default function PrayerAudioPlayerBar({ prayer }: PrayerAudioPlayerBarPro
     chantUrlObj,
     readingUrlObj,
     isOnline,
+    failedVideoIds,
     stopPlayback,
   ]);
 
@@ -179,34 +182,25 @@ export default function PrayerAudioPlayerBar({ prayer }: PrayerAudioPlayerBarPro
 
   return (
     <View style={styles.topContainer}>
-      {/* Offscreen YouTube Player with proper WebView flags for Audio Streaming */}
-      {currentYoutubeVideoId ? (
-        <View style={styles.hiddenMedia}>
-          <YoutubePlayer
-            height={200}
-            width={320}
-            play={isPlaying && activeMode !== "tts"}
-            videoId={currentYoutubeVideoId}
-            webViewProps={{
-              allowsInlineMediaPlayback: true,
-              mediaPlaybackRequiresUserAction: false,
-              androidLayerType: "hardware",
-            }}
-            initialPlayerParams={{
-              preventAutonav: true,
-              controls: false,
-            }}
-            onChangeState={(state: string) => {
-              if (state === "ended") {
-                setIsPlaying(false);
-              }
-            }}
-            onError={(err: string) => {
-              console.warn("YouTube player error:", err);
-              setIsPlaying(false);
-            }}
-          />
-        </View>
+      {/* Controlled Invisible YouTube Player */}
+      {currentYoutubeVideoId && !failedVideoIds.has(currentYoutubeVideoId) ? (
+        <YoutubeAudioPlayer
+          videoId={currentYoutubeVideoId}
+          play={isPlaying && activeMode !== "tts"}
+          onReady={() => {
+            console.log("YouTube player ready");
+          }}
+          onEnded={() => {
+            setIsPlaying(false);
+          }}
+          onError={(error) => {
+            console.warn("YouTube player error:", error);
+            setIsPlaying(false);
+            if (currentYoutubeVideoId) {
+              setFailedVideoIds((prev) => new Set(prev).add(currentYoutubeVideoId));
+            }
+          }}
+        />
       ) : null}
 
       {/* Mode Selector Chips (Only render buttons that actually have links) */}
@@ -357,15 +351,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     gap: 10,
     position: "relative",
-  },
-  hiddenMedia: {
-    position: "absolute",
-    top: -9999,
-    left: -9999,
-    width: 320,
-    height: 200,
-    opacity: 0.01,
-    overflow: "hidden",
   },
   modeSelectorRow: {
     flexDirection: "row",
