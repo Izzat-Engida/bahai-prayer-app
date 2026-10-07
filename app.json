@@ -1,42 +1,43 @@
 {
   "expo": {
-    "name": "bahai-prayer-app",
+    "name": "Bahai Prayer",
     "slug": "bahai-prayer-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/bahai.png",
     "scheme": "bahaiprayerapp",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/images/bahai.png"
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "backgroundColor": "#1B2A4A",
+        "foregroundImage": "./assets/images/bahai.png",
+        "backgroundImage": "./assets/images/bahai.png",
+        "monochromeImage": "./assets/images/bahai.png"
       },
       "predictiveBackGestureEnabled": false
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/bahai.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
-          "image": "./assets/images/splash-icon.png",
+          "backgroundColor": "#1B2A4A",
+          "image": "./assets/images/bahai.png",
           "imageWidth": 76
         }
       ],
       "expo-audio",
       "expo-font",
       "expo-sqlite",
-      "expo-asset"
+      "expo-asset",
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true,
