@@ -6,13 +6,12 @@ import {
   StyleSheet,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import * as Speech from "expo-speech";
 import YoutubeAudioPlayer from "./YoutubeAudioPlayer";
 import NetInfo from "@react-native-community/netinfo";
 import type { PrayerRaw } from "../../types/prayer.types";
 import { colors, fonts } from "../../constants/theme";
-import { getSpeechText } from "../../utils/textUtils";
 import { useAppSelector } from "../../store";
+import { useSpeechReader } from "../../hooks/useSpeechReader";
 
 interface PrayerAudioPlayerBarProps {
   prayer: PrayerRaw;
@@ -32,11 +31,15 @@ function extractYoutubeId(url: string | null | undefined): string | null {
 
 export default function PrayerAudioPlayerBar({ prayer }: PrayerAudioPlayerBarProps) {
   const { readingSpeed } = useAppSelector((state) => state.settings);
+  const speechReader = useSpeechReader();
 
   const [activeMode, setActiveMode] = useState<AudioMode>("tts");
   const [isPlaying, setIsPlaying] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const [failedVideoIds, setFailedVideoIds] = useState<Set<string>>(new Set());
+  const voiceIsPlaying =
+    speechReader.isPlaying && speechReader.activePrayerId === prayer.Id;
+  const currentlyPlaying = activeMode === "tts" ? voiceIsPlaying : isPlaying;
 
   // Check available online audio tracks (matching chant/song/son or reading/read)
   const chantUrlObj = useMemo(() => {
@@ -89,22 +92,22 @@ export default function PrayerAudioPlayerBar({ prayer }: PrayerAudioPlayerBarPro
 
   // Stop playback & reset state when prayer changes
   useEffect(() => {
-    Speech.stop();
+    speechReader.stopReading();
     setIsPlaying(false);
     setActiveMode("tts");
-  }, [prayer.Id]);
+  }, [prayer.Id, speechReader.stopReading]);
 
   // Stop speech on unmount
   useEffect(() => {
     return () => {
-      Speech.stop();
+      speechReader.stopReading();
     };
-  }, []);
+  }, [speechReader.stopReading]);
 
   const stopPlayback = useCallback(() => {
-    Speech.stop();
+    speechReader.stopReading();
     setIsPlaying(false);
-  }, []);
+  }, [speechReader.stopReading]);
 
   // Mode chip selection - DOES NOT AUTO START PLAYBACK
   const handleSelectMode = useCallback(
@@ -123,17 +126,8 @@ export default function PrayerAudioPlayerBar({ prayer }: PrayerAudioPlayerBarPro
     }
 
     if (activeMode === "tts") {
-      const textToRead = getSpeechText(prayer.Text);
-      if (!textToRead) return;
-
-      setIsPlaying(true);
-      Speech.speak(textToRead, {
-        rate: readingSpeed,
-        language: "en-US",
-        onDone: () => setIsPlaying(false),
-        onStopped: () => setIsPlaying(false),
-        onError: () => setIsPlaying(false),
-      });
+      speechReader.togglePlay(prayer.Id, prayer.Text);
+      return;
     } else if (activeMode === "chant" || activeMode === "reading") {
       const targetUrlObj = activeMode === "chant" ? chantUrlObj : readingUrlObj;
       const yid = targetUrlObj ? extractYoutubeId(targetUrlObj.Url) : null;
@@ -142,17 +136,8 @@ export default function PrayerAudioPlayerBar({ prayer }: PrayerAudioPlayerBarPro
       if (yid && isOnline && !isFailed) {
         setIsPlaying(true);
       } else {
-        // Fallback to TTS if offline, invalid URL, or video previously failed
-        const textToRead = getSpeechText(prayer.Text);
-        if (!textToRead) return;
-        setIsPlaying(true);
-        Speech.speak(textToRead, {
-          rate: readingSpeed,
-          language: "en-US",
-          onDone: () => setIsPlaying(false),
-          onStopped: () => setIsPlaying(false),
-          onError: () => setIsPlaying(false),
-        });
+        // Fallback to the same online/local TTS pipeline if the video is unavailable.
+        speechReader.togglePlay(prayer.Id, prayer.Text);
       }
     }
   }, [
@@ -165,12 +150,15 @@ export default function PrayerAudioPlayerBar({ prayer }: PrayerAudioPlayerBarPro
     isOnline,
     failedVideoIds,
     stopPlayback,
+    speechReader,
   ]);
 
   const getModeLabel = (mode: AudioMode) => {
     switch (mode) {
       case "tts":
-        return "Device Voice";
+        return speechReader.audioSourceType === "online"
+          ? "Online Voice"
+          : "Device Voice";
       case "chant":
         return "Online Chant";
       case "reading":
@@ -294,21 +282,21 @@ export default function PrayerAudioPlayerBar({ prayer }: PrayerAudioPlayerBarPro
           style={styles.playPauseBtn}
           activeOpacity={0.8}
           accessibilityLabel={
-            isPlaying ? "Pause audio reading" : `Play ${getModeLabel(activeMode)}`
+            currentlyPlaying ? "Pause audio reading" : `Play ${getModeLabel(activeMode)}`
           }
           accessibilityRole="button"
         >
           <Ionicons
-            name={isPlaying ? "pause" : "play"}
+            name={currentlyPlaying ? "pause" : "play"}
             size={22}
             color={colors.primary}
-            style={{ marginLeft: isPlaying ? 0 : 2 }}
+            style={{ marginLeft: currentlyPlaying ? 0 : 2 }}
           />
         </TouchableOpacity>
 
         <View style={styles.statusInfoGroup}>
           <Text style={styles.statusTitleText} numberOfLines={1}>
-            {isPlaying
+            {currentlyPlaying
               ? `Playing ${getModeLabel(activeMode)}`
               : `${getModeLabel(activeMode)} Audio`}
           </Text>
@@ -319,7 +307,7 @@ export default function PrayerAudioPlayerBar({ prayer }: PrayerAudioPlayerBarPro
           </Text>
         </View>
 
-        {isPlaying ? (
+        {currentlyPlaying ? (
           <TouchableOpacity
             onPress={stopPlayback}
             style={styles.stopBtn}

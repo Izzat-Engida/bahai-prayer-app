@@ -1,15 +1,26 @@
-import { View, ViewProps } from 'react-native'
+import { View, ViewProps, StyleSheet } from 'react-native'
 
-import { colors, fonts } from "../../constants/theme";
-const ReminderCard = ({className='',...rest}:ViewProps & {className?:string}) => {
+import { colors } from "../../constants/theme";
+const ReminderCard = ({className='', style, ...rest}:ViewProps & {className?:string}) => {
   return (
     <View
-    className={`rounded-2xl bg-secondary p-5 ${className} `}
+    className={className}
+    style={[styles.card, style]}
     {...rest}
     />
       
     
   )
 }
+
+const styles = StyleSheet.create({
+  card: {
+    borderRadius: 20,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: 20,
+  },
+});
 
 export default ReminderCard
