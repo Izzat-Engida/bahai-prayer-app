@@ -17,14 +17,19 @@ export async function ensurePermission():Promise<boolean>{
     if(Platform.OS==='android'){
         await Notifications.setNotificationChannelAsync(CHANNEL_ID,{
             name:'Daily reminders',
-            importance:Notifications.AndroidImportance.HIGH
+            importance:Notifications.AndroidImportance.HIGH,
+            sound:'default'
         })
     }
     const current=await Notifications.getPermissionsAsync();
-    if(current.granted) return true;
+    if(current.granted || current.ios?.status === Notifications.IosAuthorizationStatus.PROVISIONAL) {
+        return true;
+    }
 
-    const asked= await Notifications.requestPermissionsAsync()
-    return asked.granted;
+    const asked= await Notifications.requestPermissionsAsync({
+        ios:{allowAlert:true,allowBadge:true,allowSound:true}
+    });
+    return asked.granted || asked.ios?.status === Notifications.IosAuthorizationStatus.PROVISIONAL;
 }
 
 export function scheduleDaily(title:string,hour:number,minute:number){
