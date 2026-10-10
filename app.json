@@ -8,7 +8,8 @@
     "scheme": "bahaiprayerapp",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/images/bahai.png"
+      "icon": "./assets/images/bahai.png",
+      "bundleIdentifier": "com.izorium.bahaiprayerapp"
     },
     "android": {
       "adaptiveIcon": {
@@ -17,7 +18,14 @@
         "backgroundImage": "./assets/images/bahai.png",
         "monochromeImage": "./assets/images/bahai.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+      ],
+      "package": "com.izorium.bahaiprayerapp"
     },
     "web": {
       "output": "static",
@@ -42,6 +50,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "6e651670-a61f-46af-aea6-16a72e383610"
+      }
     }
   }
 }
