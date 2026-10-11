@@ -139,7 +139,7 @@ export function useSpeechReader() {
       setAudioSourceType("online");
       try {
         audioPlayer.replace(getOnlineTtsUrl(chunk));
-        audioPlayer.playbackRate = readingSpeed;
+        audioPlayer.setPlaybackRate(readingSpeed);
         audioPlayer.play();
       } catch (error) {
         console.warn("Online TTS unavailable; using local TTS:", error);
