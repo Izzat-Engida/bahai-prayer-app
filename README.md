@@ -1,56 +1,109 @@
-# Welcome to your Expo app 👋
+# Bahai Prayer
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Bahai Prayer is a mobile app for reading and listening to Bahá’í prayers and other devotional texts. It includes prayer categories, search, favorites, reading history, audio playback, the Hidden Words, and daily reminders.
 
-## Get started
+The app is built with Expo and React Native, with Expo Router handling navigation.
 
-1. Install dependencies
+## Features
 
-   ```bash
-   npm install
-   ```
+- Browse prayers by category, including obligatory, general, occasional, and tablet prayers
+- Search and filter prayer categories
+- Read prayer text with adjustable font size
+- Listen to available audio or use text-to-speech reading
+- Save prayers to favorites
+- Keep a short reading history
+- Read The Hidden Words, including Arabic and Persian sections
+- Set daily prayer or reflection reminders
+- Use the app on Android, iOS, or the web
 
-2. Start the app
+## Requirements
 
-   ```bash
-   npx expo start
-   ```
+- Node.js
+- npm
+- An Android emulator, iOS simulator, physical device, or Expo Go
 
-In the output, you'll find options to open the app in a
+The project currently uses Expo SDK 57. Some features, such as notifications and audio playback, work best in a development build rather than Expo Go.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Getting started
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+Clone the repository and install the dependencies:
 
 ```bash
-npm run reset-project
+git clone <repository-url>
+cd bahai-prayer-app
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Start the development server:
 
-### Other setup steps
+```bash
+npm run start
+```
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+From the Expo CLI, you can open the app in Expo Go, an Android emulator, an iOS simulator, or a web browser.
 
-## Learn more
+## Development builds
 
-To learn more about developing your project with Expo, look at the following resources:
+Some native modules used by the app require a development build. To run one locally:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+npm run android
+npm run ios
+```
 
-## Join the community
+You can also create an internal development build with EAS:
 
-Join our community of developers creating universal apps.
+```bash
+npx eas-cli build --profile development
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Other commands
+
+```bash
+npm run web             # Start the web version
+npx expo lint           # Run the linter
+npx tsc --noEmit        # Check TypeScript types
+npx expo-doctor         # Check Expo configuration and dependencies
+```
+
+## Project layout
+
+```text
+src/
+  app/          Screens and Expo Router routes
+  components/   Reusable UI components
+  constants/    Theme and shared constants
+  context/      React context providers
+  hooks/        Data and feature hooks
+  lib/          Small libraries, including reminders
+  services/     Local data and database access
+  store/        Redux state and slices
+  types/        TypeScript types
+  utils/        Shared utility functions
+
+assets/data/    Bundled prayer and Hidden Words data
+assets/images/  App icons and other images
+```
+
+Routes live in `src/app`. Changes to files in that directory create or update screens through Expo Router’s file-based routing system.
+
+## Data and storage
+
+Prayer content is bundled with the app in `assets/data`. Favorites and reading history are stored locally with SQLite. Reminder settings use local device storage and the platform notification system.
+
+The app does not need a backend to browse the bundled prayer content.
+
+## Building with EAS
+
+Build profiles are defined in `eas.json`:
+
+```bash
+npx eas-cli build --profile preview
+npx eas-cli build --profile production
+```
+
+The preview profile creates an Android APK for internal testing. The production profile is intended for store builds.
+
+## License
+
+See [LICENSE](LICENSE) for the project license.
