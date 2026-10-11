@@ -1,7 +1,10 @@
 import { useMemo } from 'react';
 import prayers from '../../assets/data/prayersystembylanguage.json';
 import type { PrayerJsonFormat, PrayerRaw } from "../types/prayer.types";
-import { OBLIGATORY_CATEGORY_ID } from "./usePrayerTags";
+import {
+  OBLIGATORY_CATEGORY_ID,
+  OTHER_PRAYERS_CATEGORY_ID,
+} from "./usePrayerTags";
 import {
   HIDDEN_WORDS_CATEGORY_ID,
   HIDDEN_WORDS_ARABIC_ID,
@@ -27,6 +30,10 @@ export function usePrayersByTag(tagId: number | null) {
     }
     if (tagId === HIDDEN_WORDS_PERSIAN_ID) {
       return getHiddenWords("PERSIAN").map(convertHiddenWordToPrayerRaw);
+    }
+
+    if (tagId === OTHER_PRAYERS_CATEGORY_ID) {
+      return data.Prayers;
     }
 
     if (OBLIGATORY_TAG_IDS.includes(tagId)) {

@@ -10,6 +10,7 @@ interface PrayerTextRendererProps {
   authorName?: string;
   isItalic?: boolean;
   isHiddenWord?: boolean;
+  category?:string
 }
 
 export default function PrayerTextRenderer({
@@ -18,6 +19,7 @@ export default function PrayerTextRenderer({
   authorName,
   isItalic = false,
   isHiddenWord = false,
+  category
 }: PrayerTextRendererProps) {
   const { scaledSize } = useFontSize();
   const blocks = useMemo(() => parsePrayerBlocks(html), [html]);
@@ -36,11 +38,13 @@ export default function PrayerTextRenderer({
             style={[baseStyle, styles.italicText]}
           >
             {segment.text}
+          
           </Text>
         );
       }
       return (
         <Text key={index} selectable={true} style={baseStyle}>
+  
           {segment.text}
         </Text>
       );
@@ -53,6 +57,7 @@ export default function PrayerTextRenderer({
         const text = block.segments.map((s) => s.text).join("");
         return (
           <View key={index} style={styles.invocationContainer}>
+           
             <View style={styles.invocationDecorationRow}>
               <View style={styles.goldDot} />
               <View style={styles.goldLine} />
@@ -69,6 +74,7 @@ export default function PrayerTextRenderer({
                 },
               ]}
             >
+              
               {text}
             </Text>
             <View style={styles.invocationDecorationRow}>
@@ -192,6 +198,20 @@ export default function PrayerTextRenderer({
 
   return (
     <View style={styles.container}>
+      {category ? (
+        <View style={styles.categoryHeader}>
+          <Text
+            selectable={true}
+            style={[
+              styles.categoryText,
+              { fontSize: scaledSize(18) * zoomScale },
+            ]}
+          >
+            {category}
+          </Text>
+        </View>
+      ) : null}
+
       {blocks.map(renderBlock)}
 
       {authorName ? (
@@ -214,6 +234,17 @@ export default function PrayerTextRenderer({
 const styles = StyleSheet.create({
   container: {
     width: "100%",
+  },
+
+  categoryHeader: {
+    alignItems: "center",
+    marginBottom: 10,
+    paddingHorizontal: 12,
+  },
+  categoryText: {
+    fontFamily: fonts.bodyBold,
+    color: colors.primary,
+    textAlign: "center",
   },
 
   

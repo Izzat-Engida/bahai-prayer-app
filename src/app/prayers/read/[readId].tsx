@@ -26,6 +26,7 @@ import { stripHtml, getAuthorName } from "../../../utils/textUtils";
 import { colors, fonts } from "../../../constants/theme";
 import { recordHistory, isFavorite, toggleFavorite } from "../../../services/database";
 import { isHiddenWordId } from "../../../services/hiddenWordsService";
+import { useSpeechReader } from "../../../hooks/useSpeechReader";
 
 export default function PrayerReadScreen() {
   const dispatch = useAppDispatch();
@@ -50,6 +51,8 @@ export default function PrayerReadScreen() {
 
   const prayer = usePrayerDetails(activeReadId);
   const { scaledSize } = useFontSize();
+  const speechReader = useSpeechReader();
+  const [ttsRequestId, setTtsRequestId] = useState(0);
 
 
   useEffect(() => {
@@ -196,6 +199,12 @@ export default function PrayerReadScreen() {
     }
   };
 
+  const toggleTts = () => {
+    if (!prayer) return;
+    setTtsRequestId((value) => value + 1);
+    speechReader.togglePlay(prayer.Id, prayer.Text);
+  };
+
   return (
     <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
 
@@ -242,6 +251,29 @@ export default function PrayerReadScreen() {
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
             <Ionicons name="share-social-outline" size={20} color={colors.primary} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={toggleTts}
+            style={styles.ttsButton}
+            activeOpacity={0.75}
+            accessibilityLabel={
+              speechReader.isPlaying && speechReader.activePrayerId === prayer?.Id
+                ? "Pause text to speech"
+                : "Play text to speech"
+            }
+            accessibilityRole="button"
+            hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+          >
+            <Ionicons
+              name={
+                speechReader.isPlaying && speechReader.activePrayerId === prayer?.Id
+                  ? "pause-circle"
+                  : "volume-high"
+              }
+              size={30}
+              color={colors.surface}
+            />
           </TouchableOpacity>
         </View>
       </View>
@@ -295,13 +327,18 @@ export default function PrayerReadScreen() {
           >
             <View style={styles.prayerMainWrapper}>
               
-              <PrayerAudioPlayerBar prayer={prayer} />
+              <PrayerAudioPlayerBar
+                prayer={prayer}
+                speechReader={speechReader}
+                ttsRequestId={ttsRequestId}
+              />
 
               <PrayerTextRenderer
                 html={prayer.Text}
                 zoomScale={zoomScale}
                 authorName={getAuthorName(prayer.AuthorId)}
                 isHiddenWord={isHiddenWordId(activeReadId)}
+                category={prayer.Tags?.[0]?.Name || categoryTitle}
               />
             </View>
           </ScrollView>
@@ -367,7 +404,7 @@ export default function PrayerReadScreen() {
                           isActive && styles.presetPillTextActive,
                         ]}
                       >
-                        {preset.label}
+                        {preset.label} 
                       </Text>
                     </TouchableOpacity>
                   );
@@ -456,6 +493,21 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     alignItems: "center",
     justifyContent: "center",
+  },
+  ttsButton: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: colors.secondary,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: "#DDBB70",
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
   },
   rightActionsRow: {
     flexDirection: "row",

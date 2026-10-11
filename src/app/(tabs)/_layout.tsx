@@ -18,6 +18,7 @@ const TabLayout = () => {
         tabBarInactiveTintColor: colors.muted,
 
         tabBarStyle: {
+          display: "none",
           backgroundColor: colors.surface,
           borderTopColor: colors.border,
           borderTopWidth: 1,
@@ -54,7 +55,7 @@ const TabLayout = () => {
         }}
       />
 
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="favorites"
         options={{
           title: "Favorites",
@@ -94,7 +95,7 @@ const TabLayout = () => {
             />
           ),
         }}
-      />
+      /> */}
     </Tabs>
   );
 };

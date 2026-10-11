@@ -4,7 +4,11 @@ import { Ionicons } from "@expo/vector-icons";
 import type { PrayerRaw } from "../../types/prayer.types";
 import { colors, fonts } from "../../constants/theme";
 import { useFontSize } from "../../hooks/useFontSize";
-import { getPrayerPreview, getAuthorName, getWordCount } from "../../utils/textUtils";
+import {
+  getPrayerPreview,
+  getAuthorName,
+  getWordCount,
+} from "../../utils/textUtils";
 
 type PrayerListItemProps = {
   prayer: PrayerRaw;
@@ -23,13 +27,13 @@ export default function PrayerListItem({
 }: PrayerListItemProps) {
   const { scaledSize } = useFontSize();
   const preview = getPrayerPreview(prayer.Text);
+  const categoryName =
+    prayer.Tags?.[0]?.Name || prayer.FirstTagName || "Prayer";
   const authorName = getAuthorName(prayer.AuthorId);
-  const tagName = prayer.FirstTagName || (prayer.Tags?.[0]?.Name ?? "");
   const words = getWordCount(prayer.Text);
 
   const metaParts: string[] = [];
   if (authorName) metaParts.push(authorName);
-  if (tagName) metaParts.push(tagName);
   if (words > 0) metaParts.push(`${words} words`);
   const metaString = metaParts.join(" • ");
 
@@ -40,6 +44,19 @@ export default function PrayerListItem({
       onPress={onPress}
     >
       <View style={styles.prayerContent}>
+        <Text
+          style={[
+            styles.prayerTitle,
+            {
+              fontSize: scaledSize(18),
+              lineHeight: scaledSize(24),
+            },
+          ]}
+          numberOfLines={2}
+        >
+          {categoryName}
+        </Text>
+
         <Text
           style={[
             styles.prayerPreview,
@@ -89,6 +106,11 @@ const styles = StyleSheet.create({
     fontFamily: fonts.heading,
     color: colors.text,
     marginBottom: 10,
+  },
+  prayerTitle: {
+    fontFamily: fonts.bodyMedium,
+    color: colors.primary,
+    marginBottom: 6,
   },
   metaRow: {
     flexDirection: "row",

@@ -176,7 +176,6 @@ export function getPrayerPreview(html: string | null | undefined): string {
   return previewText.replace(/\s+/g, " ").trim();
 }
 
-
 export function getSpeechText(html: string | null | undefined): string {
   if (!html) return "";
   const blocks = parsePrayerBlocks(html);

@@ -6,6 +6,7 @@ import { HIDDEN_WORDS_CATEGORY_ID } from "../services/hiddenWordsService";
 const data = prayers as PrayerJsonFormat;
 
 export const OBLIGATORY_CATEGORY_ID = 9999;
+export const OTHER_PRAYERS_CATEGORY_ID = 7777;
 
 export function usePrayerTags(kind: string | null) {
   return useMemo<TagRaw[]>(() => {
@@ -35,6 +36,25 @@ export function usePrayerTags(kind: string | null) {
           Name: "The Hidden Words",
           Kind: "HIDDEN_WORDS",
           PrayerCount: 153,
+        },
+      ];
+    }
+
+    if (kind === "SIMPLIFIED") {
+      return [
+        {
+          Id: HIDDEN_WORDS_CATEGORY_ID,
+          LanguageId: 1,
+          Name: "The Hidden Words",
+          Kind: "HIDDEN_WORDS",
+          PrayerCount: 153,
+        },
+        {
+          Id: OTHER_PRAYERS_CATEGORY_ID,
+          LanguageId: 1,
+          Name: "Normal Prayers",
+          Kind: "OTHER",
+          PrayerCount: data.Prayers.length,
         },
       ];
     }

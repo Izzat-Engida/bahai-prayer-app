@@ -11,10 +11,15 @@ import NetInfo from "@react-native-community/netinfo";
 import type { PrayerRaw } from "../../types/prayer.types";
 import { colors, fonts } from "../../constants/theme";
 import { useAppSelector } from "../../store";
-import { useSpeechReader } from "../../hooks/useSpeechReader";
+import {
+  useSpeechReader,
+  type SpeechReaderControls,
+} from "../../hooks/useSpeechReader";
 
 interface PrayerAudioPlayerBarProps {
   prayer: PrayerRaw;
+  speechReader?: SpeechReaderControls;
+  ttsRequestId?: number;
 }
 
 type AudioMode = "tts" | "chant" | "reading";
@@ -29,9 +34,14 @@ function extractYoutubeId(url: string | null | undefined): string | null {
   return null;
 }
 
-export default function PrayerAudioPlayerBar({ prayer }: PrayerAudioPlayerBarProps) {
+export default function PrayerAudioPlayerBar({
+  prayer,
+  speechReader: speechReaderProp,
+  ttsRequestId,
+}: PrayerAudioPlayerBarProps) {
   const { readingSpeed } = useAppSelector((state) => state.settings);
-  const speechReader = useSpeechReader();
+  const localSpeechReader = useSpeechReader();
+  const speechReader = speechReaderProp ?? localSpeechReader;
 
   const [activeMode, setActiveMode] = useState<AudioMode>("tts");
   const [isPlaying, setIsPlaying] = useState(false);
@@ -96,6 +106,12 @@ export default function PrayerAudioPlayerBar({ prayer }: PrayerAudioPlayerBarPro
     setIsPlaying(false);
     setActiveMode("tts");
   }, [prayer.Id, speechReader.stopReading]);
+
+  useEffect(() => {
+    if (ttsRequestId === undefined) return;
+    setIsPlaying(false);
+    setActiveMode("tts");
+  }, [ttsRequestId]);
 
   // Stop speech on unmount
   useEffect(() => {
@@ -168,6 +184,8 @@ export default function PrayerAudioPlayerBar({ prayer }: PrayerAudioPlayerBarPro
 
   const hasMultipleModes = chantUrlObj || readingUrlObj;
 
+  if (!hasMultipleModes) return null;
+
   return (
     <View style={styles.topContainer}>
       {/* Controlled Invisible YouTube Player */}
@@ -194,31 +212,6 @@ export default function PrayerAudioPlayerBar({ prayer }: PrayerAudioPlayerBarPro
       {/* Mode Selector Chips (Only render buttons that actually have links) */}
       {hasMultipleModes ? (
         <View style={styles.modeSelectorRow}>
-          <TouchableOpacity
-            onPress={() => handleSelectMode("tts")}
-            style={[
-              styles.modeChip,
-              activeMode === "tts" && styles.modeChipActive,
-            ]}
-            activeOpacity={0.8}
-            accessibilityLabel="Select Device Voice Text to Speech"
-            accessibilityRole="button"
-          >
-            <Ionicons
-              name="mic"
-              size={15}
-              color={activeMode === "tts" ? colors.primary : "#FFFFFF"}
-            />
-            <Text
-              style={[
-                styles.modeChipText,
-                activeMode === "tts" && styles.modeChipTextActive,
-              ]}
-            >
-              Voice
-            </Text>
-          </TouchableOpacity>
-
           {chantUrlObj ? (
             <TouchableOpacity
               onPress={() => handleSelectMode("chant")}
@@ -275,8 +268,8 @@ export default function PrayerAudioPlayerBar({ prayer }: PrayerAudioPlayerBarPro
         </View>
       ) : null}
 
-      {/* Main Play Controls Row */}
-      <View style={styles.controlsRow}>
+      {/* Main Play Controls Row for online chant/reading only */}
+      {activeMode !== "tts" ? <View style={styles.controlsRow}>
         <TouchableOpacity
           onPress={togglePlayPause}
           style={styles.playPauseBtn}
@@ -318,7 +311,7 @@ export default function PrayerAudioPlayerBar({ prayer }: PrayerAudioPlayerBarPro
             <Ionicons name="stop-circle" size={26} color={colors.secondary} />
           </TouchableOpacity>
         ) : null}
-      </View>
+      </View> : null}
     </View>
   );
 }
